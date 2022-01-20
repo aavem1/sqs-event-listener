@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sqs-event-listener
+Globals:
+  Function:
+    Timeout: 20
+Resources:
+  SQSEventListenerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.aj.aws.sqs.SQSEventHandler::handleRequest
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SqsQueue.Arn
+            BatchSize: 5
+    Metadata:
+      DockerTag: java11-maven-v1
+      DockerContext: ./SQSEventListenerFunction
+      Dockerfile: Dockerfile
+  SqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SimpleQueueForIntegration.fifo
+      FifoQueue: true
